@@ -1,0 +1,11 @@
+import { NextResponse } from "next/server";
+
+export async function POST() {
+  return NextResponse.json(
+    {
+      ok: false,
+      message: "Vui lòng đăng nhập qua NextAuth.",
+    },
+    { status: 410 },
+  );
+}

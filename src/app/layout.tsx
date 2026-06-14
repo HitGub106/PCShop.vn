@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ShopLayoutShell } from "./ShopLayoutShell";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PC PRIME | PC Gaming & Linh kiện máy tính",
+  title: "PC shop | PC Gaming & Linh kiện máy tính",
   description:
     "Website bán PC gaming, PC workstation, linh kiện máy tính và dịch vụ build PC theo nhu cầu.",
 };
@@ -28,7 +29,9 @@ export default function RootLayout({
       lang="vi"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ShopLayoutShell>{children}</ShopLayoutShell>
+      </body>
     </html>
   );
 }

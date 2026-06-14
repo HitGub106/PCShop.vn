@@ -1,32 +1,35 @@
 "use client";
 
-import Link from "next/link";
 import {
   useRef,
   useState,
   type CSSProperties,
+  type MouseEvent,
   type PointerEvent,
 } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 
 import { addCartItem, parseCartPrice } from "./lib/cartStorage";
-import type { Product } from "./lib/data";
+import type { MonitorItem } from "./lib/data";
 
-type ProductCardProps = {
-  product: Product;
+type MonitorCardProps = {
+  monitor: MonitorItem;
 };
 
-type ProductPanelStyle = CSSProperties & {
+type MonitorPanelStyle = CSSProperties & {
   "--overlay-x": string;
   "--overlay-y": string;
 };
 
-export function ProductCard({ product }: ProductCardProps) {
+export function MonitorCard({ monitor }: MonitorCardProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [overlayPosition, setOverlayPosition] = useState({ x: 18, y: 18 });
 
-  function handlePointerMove(event: PointerEvent<HTMLElement>) {
+  function handlePointerMove(
+    event: MouseEvent<HTMLElement> | PointerEvent<HTMLElement>,
+  ) {
     const panelWidth = panelRef.current?.offsetWidth ?? 280;
     const panelHeight = panelRef.current?.offsetHeight ?? 220;
     const inset = 12;
@@ -48,15 +51,15 @@ export function ProductCard({ product }: ProductCardProps) {
   const panelStyle = {
     "--overlay-x": `${overlayPosition.x}px`,
     "--overlay-y": `${overlayPosition.y}px`,
-  } as ProductPanelStyle;
+  } as MonitorPanelStyle;
 
   function handleAddToCart() {
     addCartItem({
-      id: product.slug,
-      image: product.image,
-      itemType: "product",
-      name: product.title,
-      price: parseCartPrice(product.price),
+      id: monitor.slug,
+      image: monitor.image,
+      itemType: "monitor",
+      name: monitor.name,
+      price: parseCartPrice(monitor.price),
     });
   }
 
@@ -67,45 +70,45 @@ export function ProductCard({ product }: ProductCardProps) {
       ref={panelRef}
       style={panelStyle}
     >
-      {product.warranty ? (
-        <p className="warranty">Bảo hành: {product.warranty}</p>
-      ) : null}
-      {product.specs.length > 0 ? (
+      <p className="warranty">Loại: {monitor.type}</p>
+      {monitor.specs.length > 0 ? (
         <ul>
-          {product.specs.map((spec) => (
-            <li key={spec}>{spec}</li>
+          {monitor.specs.map((spec) => (
+            <li key={spec.label}>
+              <strong>{spec.label}:</strong> {spec.value}
+            </li>
           ))}
         </ul>
       ) : null}
-      {product.promo ? <p className="promo-note">{product.promo}</p> : null}
     </div>
   );
 
   return (
     <article
-      className={`product-card${isPanelOpen ? " product-card--panel-open" : ""}`}
+      className={`product-card component-product-card${isPanelOpen ? " product-card--panel-open" : ""}`}
     >
       <Link
-        href={`/${product.slug}`}
+        href={`/${monitor.slug}`}
         className="product-media"
+        onMouseEnter={() => setIsPanelOpen(true)}
+        onMouseLeave={() => setIsPanelOpen(false)}
+        onMouseMove={handlePointerMove}
         onPointerEnter={() => setIsPanelOpen(true)}
         onPointerLeave={() => setIsPanelOpen(false)}
         onPointerMove={handlePointerMove}
         role="img"
-        aria-label={product.title}
-        style={{ backgroundImage: `url(${product.image})` }}
+        aria-label={monitor.name}
+        style={{ backgroundImage: `url(${monitor.image})` }}
       >
-        {product.discount ? (
-          <span className="discount-badge">{product.discount}</span>
-        ) : null}
+        <span className="discount-badge">{monitor.type}</span>
       </Link>
       <div className="product-body">
         <h3>
-          <Link href={`/${product.slug}`}>{product.title}</Link>
+          <Link href={`/${monitor.slug}`}>{monitor.name}</Link>
         </h3>
         <div className="price-row">
-          <strong>{product.price}</strong>
-          {product.oldPrice ? <span>{product.oldPrice}</span> : null}
+          <strong>{monitor.price || "Liên hệ"}</strong>
+          <span>{monitor.brand}</span>
         </div>
       </div>
       {isPanelOpen ? createPortal(hoverPanel, document.body) : null}

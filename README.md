@@ -1,1 +1,1 @@
-This is a project for a university course
+This is a project for a university course.
