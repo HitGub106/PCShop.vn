@@ -15,6 +15,7 @@ type UserRow = {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
+    error: "/login",
     signIn: "/login",
   },
   secret:

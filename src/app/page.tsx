@@ -3,6 +3,7 @@ import { ComponentCarousel } from "./ComponentCarousel";
 import { MonitorCarousel } from "./MonitorCarousel";
 import { ProductCarousel } from "./ProductCarousel";
 import { fetchComponents, fetchMonitors, fetchProducts } from "./lib/data";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -108,9 +109,9 @@ export default async function Home() {
         <div className="builder-options" aria-label="Nhu cầu build PC">
           {["Chơi game", "Đồ họa 2D/3D", "Render video", "Máy văn phòng"].map(
             (option) => (
-              <button type="button" key={option}>
+              <Link type="button" key={option} href="/build_pc">
                 {option}
-              </button>
+              </Link>
             ),
           )}
         </div>

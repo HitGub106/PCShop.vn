@@ -58,7 +58,7 @@ export default function LoginPage() {
         redirectTo: "/",
       });
 
-      if (!result?.ok) {
+      if (!result?.ok || result.error || result.code) {
         setErrors({
           password: "Email hoặc mật khẩu không đúng.",
         });
