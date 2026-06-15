@@ -28,6 +28,11 @@ type OrderResponse = {
   message?: string;
 };
 
+type StockCheckResponse = {
+  ok: boolean;
+  message?: string;
+};
+
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type CartContentProps = {
@@ -44,6 +49,7 @@ export function CartContent({ initialBuyerInfo }: CartContentProps) {
   const [buyerInfo, setBuyerInfo] = useState(initialBuyerInfo);
   const [errors, setErrors] = useState<BuyerErrors>({});
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+  const [isCheckingStock, setIsCheckingStock] = useState(false);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
   const [orderStatus, setOrderStatus] = useState("");
 
@@ -87,7 +93,7 @@ export function CartContent({ initialBuyerInfo }: CartContentProps) {
     setOrderStatus("");
   }
 
-  function handleSubmitOrder() {
+  async function handleSubmitOrder() {
     const nextErrors = validateBuyerInfo(buyerInfo);
 
     if (Object.keys(nextErrors).length > 0) {
@@ -103,7 +109,35 @@ export function CartContent({ initialBuyerInfo }: CartContentProps) {
 
     setErrors({});
     setOrderStatus("");
-    setIsPaymentOpen(true);
+    setIsCheckingStock(true);
+
+    try {
+      const response = await fetch("/api/cart/stock", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ items }),
+      });
+      const result = (await response.json()) as StockCheckResponse;
+
+      if (!response.ok || !result.ok) {
+        const message = result.message ?? "Không đủ tồn kho, vui lòng thử lại.";
+
+        window.alert(message);
+        setOrderStatus(message);
+        return;
+      }
+
+      setIsPaymentOpen(true);
+    } catch {
+      const message = "Không thể kiểm tra tồn kho lúc này. Vui lòng thử lại sau.";
+
+      window.alert(message);
+      setOrderStatus(message);
+    } finally {
+      setIsCheckingStock(false);
+    }
   }
 
   async function handleCompletePayment() {
@@ -287,11 +321,11 @@ export function CartContent({ initialBuyerInfo }: CartContentProps) {
 
           <button
             className="order-button"
-            disabled={items.length === 0}
+            disabled={items.length === 0 || isCheckingStock}
             onClick={handleSubmitOrder}
             type="button"
           >
-            Đặt hàng
+            {isCheckingStock ? "Đang kiểm tra tồn kho..." : "Đặt hàng"}
           </button>
         </form>
       </div>

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { sql } from "@vercel/postgres";
 
 import { auth } from "@/auth";
 import { AccountMenu } from "./AccountMenu";
@@ -61,9 +62,30 @@ type ShopLayoutShellProps = {
   children: ReactNode;
 };
 
+type CurrentUserRow = {
+  full_name: string | null;
+};
+
+async function getCurrentUserName(userId: string | undefined) {
+  if (!userId) {
+    return null;
+  }
+
+  const { rows } = await sql<CurrentUserRow>`
+    SELECT full_name
+    FROM users
+    WHERE id = ${userId}
+    LIMIT 1;
+  `;
+
+  return rows[0]?.full_name ?? null;
+}
+
 export async function ShopLayoutShell({ children }: ShopLayoutShellProps) {
   const session = await auth();
-  const userName = session?.user.fullName || session?.user.name;
+  const currentUserName = await getCurrentUserName(session?.user.id);
+  const userName = currentUserName || session?.user.fullName || session?.user.name;
+  const userRole = session?.user.role ?? "";
 
   return (
     <div className="shop-shell">
@@ -88,7 +110,7 @@ export async function ShopLayoutShell({ children }: ShopLayoutShellProps) {
             </nav>
             {userName ? (
               <div className="account-links">
-                <AccountMenu userName={userName} />
+                <AccountMenu userName={userName} userRole={userRole} />
               </div>
             ) : (
               <div className="account-links">

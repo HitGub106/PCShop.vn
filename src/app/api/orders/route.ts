@@ -2,6 +2,7 @@ import { sql } from "@vercel/postgres";
 import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
+import { validateStockItems } from "../../lib/stockValidation";
 
 type OrderItemInput = {
   id: string;
@@ -64,6 +65,18 @@ export async function POST(request: Request) {
       (total, item) => total + item.price * item.quantity,
       0,
     );
+    const stockValidation = await validateStockItems(items);
+
+    if (!stockValidation.ok) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Không đủ tồn kho, vui lòng thử lại.",
+        },
+        { status: 409 },
+      );
+    }
+
     const invoiceCode = createInvoiceCode();
 
     const { rows } = await sql<InvoiceRow>`
