@@ -85,7 +85,7 @@ export function MonitorCard({ monitor }: MonitorCardProps) {
 
   return (
     <article
-      className={`product-card component-product-card${isPanelOpen ? " product-card--panel-open" : ""}`}
+      className={`product-card monitor-product-card${isPanelOpen ? " product-card--panel-open" : ""}`}
     >
       <Link
         href={`/${monitor.slug}`}
@@ -100,7 +100,9 @@ export function MonitorCard({ monitor }: MonitorCardProps) {
         aria-label={monitor.name}
         style={{ backgroundImage: `url(${monitor.image})` }}
       >
-        <span className="discount-badge">{monitor.type}</span>
+        {monitor.discount ? (
+          <span className="discount-badge">{monitor.discount}</span>
+        ) : null}
       </Link>
       <div className="product-body">
         <h3>
@@ -108,7 +110,7 @@ export function MonitorCard({ monitor }: MonitorCardProps) {
         </h3>
         <div className="price-row">
           <strong>{monitor.price || "Liên hệ"}</strong>
-          <span>{monitor.brand}</span>
+          {monitor.oldPrice ? <span>{monitor.oldPrice}</span> : null}
         </div>
       </div>
       {isPanelOpen ? createPortal(hoverPanel, document.body) : null}
